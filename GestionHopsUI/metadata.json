@@ -1,0 +1,6 @@
+{
+  "name": "Gestionhops — Hospital Dr. Gustavo Fricke",
+  "description": "Sistema de trazabilidad clínica y logística de inventario hospitalario para el Hospital Dr. Gustavo Fricke.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

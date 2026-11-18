@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id            Int          @id @default(autoincrement())
+  rut           String       @unique
+  nombre        String
+  rol           String       // ADMIN, JEFE_BODEGA, CLINICO
+  password_hash String
+  movimientos   Movimiento[]
+}
+
+model Bodega {
+  id                 Int          @id @default(autoincrement())
+  nombre             String
+  tipo               String       // CENTRAL, PERIFERICA
+  gaveta_inteligente Boolean      @default(false)
+  inventarios        Inventario[]
+  movimientosOrigen  Movimiento[] @relation("BodegaOrigen")
+  movimientosDestino Movimiento[] @relation("BodegaDestino")
+}
+
+model Dispositivo {
+  id           Int          @id @default(autoincrement())
+  codigo_gs1   String       @unique
+  nombre       String
+  categoria    String
+  stock_minimo Int          @default(0)
+  inventarios  Inventario[]
+  movimientos  Movimiento[]
+}
+
+model Inventario {
+  id                Int       @id @default(autoincrement())
+  bodega_id         Int
+  dispositivo_id    Int
+  cantidad_actual   Int       @default(0)
+  fecha_vencimiento DateTime?
+  lote              String?
+
+  bodega      Bodega      @relation(fields: [bodega_id], references: [id])
+  dispositivo Dispositivo @relation(fields: [dispositivo_id], references: [id])
+
+  @@unique([bodega_id, dispositivo_id, lote]) 
+}
+
+model Movimiento {
+  id                Int      @id @default(autoincrement())
+  usuario_id        Int
+  dispositivo_id    Int
+  bodega_origen_id  Int?     
+  bodega_destino_id Int?     
+  tipo_movimiento   String   // INGRESO, SALIDA, TRASPASO
+  cantidad          Int
+  fecha_hora        DateTime @default(now())
+  observacion       String?
+
+  usuario        Usuario     @relation(fields: [usuario_id], references: [id])
+  dispositivo    Dispositivo @relation(fields: [dispositivo_id], references: [id])
+  bodega_origen  Bodega?     @relation("BodegaOrigen", fields: [bodega_origen_id], references: [id])
+  bodega_destino Bodega?     @relation("BodegaDestino", fields: [bodega_destino_id], references: [id])
+}
